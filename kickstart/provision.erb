@@ -51,7 +51,11 @@ skipx
 <% dhcp = !@static -%>
 <% end -%>
 
+<% if rhel_compatible && os_major == 5 -%>
+network --bootproto <%= dhcp ? 'dhcp' : "static --ip=#{@host.ip} --netmask=#{subnet.mask} --gateway=#{subnet.gateway} --nameserver=#{[subnet.dns_primary, subnet.dns_secondary].select(&:present?).join(',')}" %> --hostname <%= @host %>
+<% else -%>
 network --bootproto <%= dhcp ? 'dhcp' : "static --ip=#{@host.ip} --netmask=#{subnet.mask} --gateway=#{subnet.gateway} --nameserver=#{[subnet.dns_primary, subnet.dns_secondary].select(&:present?).join(',')}" %> --device=<%= @host.mac -%> --hostname <%= @host %>
+<% end -%>
 
 rootpw --iscrypted <%= root_pass %>
 firewall --<%= os_major >= 6 ? 'service=' : '' %>ssh
